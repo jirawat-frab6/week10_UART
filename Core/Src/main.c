@@ -23,6 +23,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <stdio.h>
+#include <string.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -89,7 +92,11 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  {
+	  //char temp[] = "HELLO WORLD\r\n please type something to test UART\r\n";
 
+	  //HAL_UART_Transmit(&huart2, (uint8_t *) temp, strlen(temp), 10);
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
