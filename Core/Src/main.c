@@ -47,6 +47,9 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+char RXdatabuffer[45] = "";
+char TXdatabuffer[45] = "";
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,6 +57,9 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
+
+int16_t UARTRecieveIT();
+
 
 /* USER CODE END PFP */
 
@@ -93,9 +99,9 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   {
-	  //char temp[] = "HELLO WORLD\r\n please type something to test UART\r\n";
+	  char temp[] = "HELLO WORLD\r\n please type something to test UART\r\n";
 
-	  //HAL_UART_Transmit(&huart2, (uint8_t *) temp, strlen(temp), 10);
+	  HAL_UART_Transmit(&huart2, (uint8_t *) temp, strlen(temp), 1000);
   }
   /* USER CODE END 2 */
 
@@ -103,7 +109,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	  HAL_UART_Receive_IT(&huart2, (uint8_t*) RXdatabuffer, 32);
+
+	  int16_t inputchar = UARTRecieveIT();
+	  if(inputchar != -1){
+
+		  sprintf(TXdatabuffer,"ReceivedChar: [%c]\r\n",inputchar);
+		  HAL_UART_Transmit(&huart2, (uint8_t*)TXdatabuffer, strlen(TXdatabuffer),1000);
+
+	  }
+
+
     /* USER CODE END WHILE */
+
+
 
     /* USER CODE BEGIN 3 */
   }
@@ -221,6 +241,31 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+
+	sprintf(TXdatabuffer, "Received:[%s]\r\n",RXdatabuffer);
+	HAL_UART_Transmit(&huart2, (uint8_t*)TXdatabuffer, strlen(TXdatabuffer),1000);
+
+
+}
+
+int16_t UARTRecieveIT(){
+
+	static uint32_t dataPos = 0;
+
+	int16_t data = -1;
+
+	if(huart2.RxXferSize - huart2.RxXferCount != dataPos){
+
+		data = RXdatabuffer[dataPos];
+
+		dataPos = (dataPos+1)%huart2.RxXferSize;
+
+	}
+	return data;
+}
+
 
 /* USER CODE END 4 */
 
