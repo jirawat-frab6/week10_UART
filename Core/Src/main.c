@@ -60,6 +60,8 @@ char RXdatabuffer[45] = "";
 char TXdatabuffer[45] = "";
 uint16_t state = 0,led_frequency = 1,led_status = 0;
 uint32_t timestamp = 0;
+uint8_t a = 0;
+uint8_t b = 0;
 
 /* USER CODE END PV */
 
@@ -147,8 +149,16 @@ int main(void)
 				  switch (inputchar){
 					  case 'x': state = main_state;print(main_state);break;
 					  default: print(wrong_input);
-				  }break;
+				  }
+				  break;
 		  }
+	  }
+
+	  b=a;
+	  a=HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
+
+	  if(state == button_state && a!=b){
+		  print(7);
 	  }
 
 	  //LED
@@ -321,11 +331,13 @@ void print(uint8_t input){
 	switch (input){
 		case main_state: strcat(temp,"==============\r\n0:LED Control\r\n1:button Status\r\n==============\r\n");break;
 		case led_state: strcat(temp,"==============\r\na:Speed Up 1Hz\r\nb:Speed down 1Hz\r\nd:On/off\r\nx:back\r\n==============\r\n");break;
-		case button_state: strcat(temp,"==============\r\nx:back\r\n");if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)){strcat(temp,"un");}strcat(temp,"press\r\n==============\r\n");break;
+		case button_state: strcat(temp,"==============\r\nx:back\r\n");break;
 		case frequency: sprintf(temp,"==============\r\nFrequency: %d Hz\r\n==============\r\n",led_frequency);break;
 		case toggle_led: strcat(temp,"==============\r\ntoggle_led\r\n==============\r\n");break;
 		case wrong_input: strcat(temp,"==============\r\nWrong Input!\r\n==============\r\n");break;
+		case 7: if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)){strcat(temp,"un");}strcat(temp,"press\r\n");break;
 	}
+
 	HAL_UART_Transmit(&huart2, (uint8_t*)temp, strlen(temp),1000);
 }
 
